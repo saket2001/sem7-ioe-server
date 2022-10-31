@@ -59,6 +59,7 @@ server.post("/api/v1/owner-sign-up", routes.createOwner);
 
 // analysis
 server.get("/api/v1/pet-analysis/:owner_id/:date", routes.dataAnalysis);
+server.get("/api/v1/pet-weekly-analysis/:owner_id", routes.getWeeklyRecord);
 //////////////////////////////////
 
 server.listen(PORT, () => {

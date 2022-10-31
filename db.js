@@ -186,7 +186,7 @@ const dbOperations = {
       return "Failed to get the automatic feeding record!";
     }
   },
-  getDataForAnalysis: async (id, date) => {
+  getDataForAnalysis: async (id) => {
     try {
       const data = await EatingRecords.find({ owner_id: id });
       if (!data) return "error";

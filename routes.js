@@ -168,6 +168,7 @@ const routes = {
   getFeedingDetailsByDate: async (req, res) => {
     try {
       const { owner_id, date } = req.params;
+      console.log(owner_id, date);
       const response = await dbOperations.getFeedingDetailsByDate(
         owner_id,
         date
@@ -258,7 +259,7 @@ const routes = {
           dataAnalysis["weeksTotal"] = count;
         });
         count = 0;
-        
+
         // no of times owner fed the pet
         response.forEach((d) => {
           if (d.date === date && d.type_of_action === "Fed by owner") {
@@ -279,6 +280,50 @@ const routes = {
 
         return res.status(200).json({ isError: false, data: dataAnalysis });
       } else return res.status(200).json({ isError: true, response });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(500)
+        .json({ isError: true, message: "Error connecting to servers" });
+    }
+  },
+  getWeeklyRecord: async (req, res) => {
+    try {
+      // owner id
+      const { owner_id } = req.params;
+
+      // get data
+      const data = await dbOperations.getDataForAnalysis(owner_id);
+
+      // calculate week days data to send
+      const currMonth = new Date().getMonth();
+      const currWeek = utils.calWeekNumber(new Date());
+
+      let weekData = {
+        '0':0,  // sun
+        '1':0,  // mon
+        '2':0,
+        '3':0,
+        '4':0,
+        '5':0,
+        '6':0,
+      };
+      // getting this month's data
+      const monthsData = data?.map((d) => {
+        if (new Date(d?.date).getMonth() === currMonth) return d;
+      });
+
+      // getting current week's data
+      monthsData?.forEach((d) => {
+        if (utils.calWeekNumber(d?.date) === 4) {
+          const prevAmt = weekData[new Date(d?.date).getDay().toString()];
+          weekData[new Date(d?.date).getDay().toString()] =
+            prevAmt + +d?.amountGiven.slice(0,3);
+        }
+      });
+
+      //
+      return res.status(200).json({ isError: false, data: weekData });
     } catch (err) {
       console.log(err);
       return res
